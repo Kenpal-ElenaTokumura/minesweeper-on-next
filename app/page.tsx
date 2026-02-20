@@ -165,6 +165,10 @@ export default function Page() {
       return
     }
 
+    if (event.pointerType !== "mouse") {
+      event.preventDefault()
+    }
+
     clearLongPressTimer()
     longPressTriggeredRef.current = false
     longPressTimerRef.current = window.setTimeout(() => {
@@ -182,6 +186,10 @@ export default function Page() {
     if (event.pointerType === "mouse" && event.button !== 0) {
       clearLongPressTimer()
       return
+    }
+
+    if (event.pointerType !== "mouse") {
+      event.preventDefault()
     }
 
     const wasLongPress = longPressTriggeredRef.current
@@ -281,7 +289,7 @@ export default function Page() {
                     handleFlag(cell.row, cell.col)
                   }}
                   disabled={isInactive}
-                  className={`rounded border-none text-xs font-bold touch-manipulation sm:text-sm ${
+                  className={`select-none rounded border-none text-xs font-bold touch-manipulation sm:text-sm ${
                     isInactive ? "cursor-not-allowed" : "cursor-pointer"
                   } ${isOpened ? "bg-slate-200 text-blue-800" : "bg-white text-slate-900"}`}
                   style={{
