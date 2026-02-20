@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   type Cell,
+  countFlags,
+  createEmptyBoard,
   DIFFICULTY_CONFIG,
   type Difficulty,
   type GameStatus,
-  countFlags,
-  createEmptyBoard,
   isWin,
   openCell,
   placeMines,
