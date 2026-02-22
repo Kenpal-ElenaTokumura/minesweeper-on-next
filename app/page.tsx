@@ -21,16 +21,6 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
 }
 
-function getStatusText(status: GameStatus): string {
-  if (status === "won") {
-    return "クリア！"
-  }
-  if (status === "lost") {
-    return "ゲームオーバー"
-  }
-  return "プレイ中"
-}
-
 function getCellLabel(cell: Cell, status: GameStatus): string {
   if (!cell.isOpen) {
     if (cell.isFlagged) {
@@ -285,16 +275,17 @@ export default function Page() {
           </label>
 
           <span className="rounded-md bg-white px-3 py-2 text-sm sm:text-base">
-            状態: {getStatusText(status)}
-          </span>
-          <span className="rounded-md bg-white px-3 py-2 text-sm sm:text-base">
             残り地雷(目安): {remainingMines}
           </span>
           <span
             className={`rounded-md px-3 py-2 text-sm tabular-nums sm:text-base ${
               status === "won"
                 ? "bg-emerald-100 font-bold text-emerald-800"
-                : "bg-white"
+                : status === "playing"
+                  ? "bg-blue-100 text-blue-800"
+                  : status === "lost"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-white"
             }`}
           >
             タイム: {formatTime(elapsedTime)}
