@@ -70,6 +70,13 @@ export default function Page() {
   const timerIntervalRef = useRef<number | null>(null)
   const startTimeRef = useRef<number | null>(null)
 
+  const clearTimerInterval = () => {
+    if (timerIntervalRef.current !== null) {
+      window.clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+  }
+
   const flags = useMemo(() => countFlags(board), [board])
   const remainingMines = config.mines - flags
 
@@ -227,10 +234,7 @@ export default function Page() {
         }
       }, 1000)
     } else {
-      if (timerIntervalRef.current !== null) {
-        window.clearInterval(timerIntervalRef.current)
-        timerIntervalRef.current = null
-      }
+      clearTimerInterval()
       if (status === "won" || status === "lost") {
         if (startTimeRef.current !== null) {
           setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000))
@@ -242,10 +246,7 @@ export default function Page() {
       }
     }
     return () => {
-      if (timerIntervalRef.current !== null) {
-        window.clearInterval(timerIntervalRef.current)
-        timerIntervalRef.current = null
-      }
+      clearTimerInterval()
     }
   }, [status])
 
@@ -258,10 +259,7 @@ export default function Page() {
       if (resetFeedbackTimerRef.current !== null) {
         window.clearTimeout(resetFeedbackTimerRef.current)
       }
-      if (timerIntervalRef.current !== null) {
-        window.clearInterval(timerIntervalRef.current)
-        timerIntervalRef.current = null
-      }
+      clearTimerInterval()
     }
   }, [])
 
