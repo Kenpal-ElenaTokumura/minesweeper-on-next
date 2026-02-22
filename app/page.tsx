@@ -15,6 +15,12 @@ import {
   toggleFlag,
 } from "../lib/minesweeper"
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+}
+
 function getStatusText(status: GameStatus): string {
   if (status === "won") {
     return "クリア！"
@@ -57,9 +63,19 @@ export default function Page() {
   const [status, setStatus] = useState<GameStatus>("ready")
   const [minesPlaced, setMinesPlaced] = useState(false)
   const [isResetButtonAnimating, setIsResetButtonAnimating] = useState(false)
+  const [elapsedTime, setElapsedTime] = useState(0)
   const longPressTimerRef = useRef<number | null>(null)
   const longPressTriggeredRef = useRef(false)
   const resetFeedbackTimerRef = useRef<number | null>(null)
+  const timerIntervalRef = useRef<number | null>(null)
+  const startTimeRef = useRef<number | null>(null)
+
+  const clearTimerInterval = () => {
+    if (timerIntervalRef.current !== null) {
+      window.clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+  }
 
   const flags = useMemo(() => countFlags(board), [board])
   const remainingMines = config.mines - flags
@@ -208,6 +224,33 @@ export default function Page() {
   }
 
   useEffect(() => {
+    if (status === "playing") {
+      if (startTimeRef.current === null) {
+        startTimeRef.current = Date.now()
+      }
+      timerIntervalRef.current = window.setInterval(() => {
+        if (startTimeRef.current !== null) {
+          setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000))
+        }
+      }, 1000)
+    } else {
+      clearTimerInterval()
+      if (status === "won" || status === "lost") {
+        if (startTimeRef.current !== null) {
+          setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000))
+        }
+      }
+      if (status === "ready") {
+        startTimeRef.current = null
+        setElapsedTime(0)
+      }
+    }
+    return () => {
+      clearTimerInterval()
+    }
+  }, [status])
+
+  useEffect(() => {
     return () => {
       if (longPressTimerRef.current !== null) {
         window.clearTimeout(longPressTimerRef.current)
@@ -216,6 +259,7 @@ export default function Page() {
       if (resetFeedbackTimerRef.current !== null) {
         window.clearTimeout(resetFeedbackTimerRef.current)
       }
+      clearTimerInterval()
     }
   }, [])
 
@@ -224,7 +268,7 @@ export default function Page() {
       <div className="w-full lg:max-w-2/3">
         <h1 className="mb-4 text-2xl font-semibold sm:text-3xl">Minesweeper</h1>
 
-        <section className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-[auto_1fr_1fr_auto] lg:items-center">
+        <section className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-[auto_1fr_1fr_1fr_auto] lg:items-center">
           <label className="flex items-center justify-between gap-2 rounded-md bg-white px-3 py-2 sm:justify-start sm:bg-transparent sm:px-0 sm:py-0">
             難易度:
             <select
@@ -245,6 +289,15 @@ export default function Page() {
           </span>
           <span className="rounded-md bg-white px-3 py-2 text-sm sm:text-base">
             残り地雷(目安): {remainingMines}
+          </span>
+          <span
+            className={`rounded-md px-3 py-2 text-sm tabular-nums sm:text-base ${
+              status === "won"
+                ? "bg-emerald-100 font-bold text-emerald-800"
+                : "bg-white"
+            }`}
+          >
+            タイム: {formatTime(elapsedTime)}
           </span>
 
           <button
